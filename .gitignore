@@ -1,4 +1,7 @@
 node_modules/
+<<<<<<< HEAD
 .DS_Store
 *.db
 .vscode/
+=======
+>>>>>>> 9c72d81551e71a9147fee112540e0021e91ce6f8
