@@ -23,7 +23,7 @@ db.serialize(() => {
     )
   `);
 
-  db.run(`DELETE FROM users`);
+  //db.run(`DELETE FROM users`);
 
   db.run(`
     INSERT INTO users (username, password, name, role, department, manager_id)
@@ -44,6 +44,15 @@ db.serialize(() => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+// Tracking Logs Table
+db.run(`
+  CREATE TABLE IF NOT EXISTS tracking_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id INTEGER,
+    action TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
 });
 
@@ -52,7 +61,31 @@ db.serialize(() => {
 app.get("/", (req, res) => {
   res.send("DB & Logic running 🚀");
 });
+// Test Add Request
+app.get("/test-request", (req, res) => {
 
+  db.run(
+    `INSERT INTO requests (user_id, title, description)
+     VALUES (?, ?, ?)`,
+    [3, "Vacation", "Need 3 days leave"],
+    function (err) {
+
+      if (err) return res.send(err);
+
+      const requestId = this.lastID;
+
+      db.run(
+        `INSERT INTO tracking_logs (request_id, action)
+         VALUES (?, ?)`,
+        [requestId, "Submitted"]
+      );
+
+      res.send("Test request created");
+
+    }
+  );
+
+});
 
 // Add Request
 app.post("/add-request", (req, res) => {
@@ -63,12 +96,23 @@ app.post("/add-request", (req, res) => {
      VALUES (?, ?, ?)`,
     [user_id, title, description],
     function (err) {
+
       if (err) return res.status(500).json({ error: err.message });
+
+      const requestId = this.lastID;
+
+      // Save tracking log
+      db.run(
+        `INSERT INTO tracking_logs (request_id, action)
+         VALUES (?, ?)`,
+        [requestId, "Submitted"]
+      );
 
       res.json({
         message: "Request created successfully",
-        id: this.lastID
+        id: requestId
       });
+
     }
   );
 });
