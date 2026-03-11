@@ -1,15 +1,16 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
 app.use(express.json());
 
 const db = new sqlite3.Database("./database.db");
 
 db.serialize(() => {
-
   // Users Table
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -22,8 +23,6 @@ db.serialize(() => {
       manager_id INTEGER
     )
   `);
-
-  //db.run(`DELETE FROM users`);
 
   db.run(`
     INSERT INTO users (username, password, name, role, department, manager_id)
@@ -44,32 +43,102 @@ db.serialize(() => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
-// Tracking Logs Table
-db.run(`
-  CREATE TABLE IF NOT EXISTS tracking_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    request_id INTEGER,
-    action TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  )
-`);
 
+  // Tracking Logs Table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS tracking_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      request_id INTEGER,
+      action TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 });
-
 
 // Root Test
 app.get("/", (req, res) => {
   res.send("DB & Logic running 🚀");
 });
+
+// POST: ارسال طلب جديد
+app.post("/requests", (req, res) => {
+  const { user_id, request_type, description } = req.body;
+
+  const sql = `
+    INSERT INTO requests (user_id, title, description, status)
+    VALUES (?, ?, ?, 'Submitted')
+  `;
+
+  db.run(sql, [user_id, request_type, description], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    const requestId = this.lastID;
+
+    db.run(
+      `INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`,
+      [requestId, "Submitted"]
+    );
+
+    res.json({
+      message: "Request submitted successfully",
+      request_id: requestId
+    });
+  });
+});
+
+// GET: عرض طلبات الموظف
+app.get("/my-requests/:user_id", (req, res) => {
+  const user_id = req.params.user_id;
+
+  const sql = `
+    SELECT * FROM requests
+    WHERE user_id = ?
+  `;
+
+  db.all(sql, [user_id], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    res.json(rows);
+  });
+});
+
+// POST: موافقة المدير او رفض الطلب
+app.post("/approve-request", (req, res) => {
+  const { request_id, status } = req.body;
+
+  const sql = `
+    UPDATE requests
+    SET status = ?
+    WHERE id = ?
+  `;
+
+  db.run(sql, [status, request_id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    db.run(
+      `INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`,
+      [request_id, status]
+    );
+
+    res.json({
+      message: "Request status updated successfully"
+    });
+  });
+});
+
 // Test Add Request
 app.get("/test-request", (req, res) => {
-
   db.run(
     `INSERT INTO requests (user_id, title, description)
      VALUES (?, ?, ?)`,
     [3, "Vacation", "Need 3 days leave"],
     function (err) {
-
       if (err) return res.send(err);
 
       const requestId = this.lastID;
@@ -81,10 +150,8 @@ app.get("/test-request", (req, res) => {
       );
 
       res.send("Test request created");
-
     }
   );
-
 });
 
 // Add Request
@@ -96,12 +163,10 @@ app.post("/add-request", (req, res) => {
      VALUES (?, ?, ?)`,
     [user_id, title, description],
     function (err) {
-
       if (err) return res.status(500).json({ error: err.message });
 
       const requestId = this.lastID;
 
-      // Save tracking log
       db.run(
         `INSERT INTO tracking_logs (request_id, action)
          VALUES (?, ?)`,
@@ -112,11 +177,9 @@ app.post("/add-request", (req, res) => {
         message: "Request created successfully",
         id: requestId
       });
-
     }
   );
 });
-
 
 // Login API
 app.post("/login", (req, res) => {
@@ -140,7 +203,6 @@ app.post("/login", (req, res) => {
   );
 });
 
-
 // Get All Requests
 app.get("/requests", (req, res) => {
   db.all("SELECT * FROM requests", [], (err, rows) => {
@@ -149,7 +211,6 @@ app.get("/requests", (req, res) => {
   });
 });
 
-
 // Get All Users
 app.get("/users", (req, res) => {
   db.all("SELECT * FROM users", [], (err, rows) => {
@@ -157,7 +218,6 @@ app.get("/users", (req, res) => {
     res.json(rows);
   });
 });
-
 
 // Auto Escalation Logic
 function autoEscalateRequests() {
@@ -170,7 +230,6 @@ function autoEscalateRequests() {
 }
 
 setInterval(autoEscalateRequests, 60000);
-
 
 // Start Server
 app.listen(3000, () => {
