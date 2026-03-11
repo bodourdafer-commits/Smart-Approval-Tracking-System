@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -17,25 +17,26 @@
                 </tr>
             </thead>
             <tbody id="requestsList">
-                </tbody>
+            </tbody>
         </table>
         <button onclick="location.href='index.html'" class="back-btn">Back to Submit</button>
     </div>
 
     <script>
         async function loadRequests() {
-            const response = await fetch('http://localhost:3000/my-requests');
+            const response = await fetch('http://localhost:3000/my-requests/1');
             const requests = await response.json();
             const list = document.getElementById('requestsList');
-            
+
             list.innerHTML = requests.map(req => `
                 <tr>
-                    <td>${req.type}</td>
+                    <td>${req.title}</td>
                     <td>${req.description}</td>
                     <td><span class="status ${req.status.toLowerCase()}">${req.status}</span></td>
                 </tr>
             `).join('');
         }
+
         window.onload = loadRequests;
     </script>
 </body>
