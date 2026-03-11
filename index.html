@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,7 @@
 <body>
     <div class="container">
         <h2>Submit New Request</h2>
+
         <form id="requestForm">
             <div class="form-group">
                 <label>Request Type:</label>
@@ -16,29 +17,37 @@
                     <option value="Hardware">Hardware Purchase</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label>Description:</label>
                 <textarea id="description" required></textarea>
             </div>
+
             <button type="submit" class="submit-btn">Send Request</button>
         </form>
-        <button onclick="location.href='requests.html'" class="secondary-btn">View My Requests</button>
+
+        <button onclick="location.href='requests.html'" class="secondary-btn">
+            View My Requests
+        </button>
+
         <p id="message"></p>
     </div>
 
     <script>
         document.getElementById('requestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
             const data = {
-                type: document.getElementById('requestType').value,
-                description: document.getElementById('description').value,
-                status: 'Pending' 
+                user_id: 1,
+                request_type: document.getElementById('requestType').value,
+                description: document.getElementById('description').value
             };
 
-            
             const response = await fetch('http://localhost:3000/requests', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
 
