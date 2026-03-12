@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+Front-end-Developer
     <h2>My Approval Tracking</h2>
     <table>
         <thead>
@@ -20,20 +21,38 @@
     </table>
     <button style="max-width:200px; margin-top:20px;" onclick="location.href='index.html'">Back to Submit</button>
 
+    <div class="container-wide">
+        <h2>My Submitted Requests</h2>
+        <table class="requests-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="requestsList">
+            </tbody>
+        </table>
+        <button onclick="location.href='index.html'" class="back-btn">Back to Submit</button>
+    </div>
+main
+
     <script>
         async function loadRequests() {
-            const response = await fetch('http://localhost:3000/my-requests');
+            const response = await fetch('http://localhost:3000/my-requests/1');
             const requests = await response.json();
             const list = document.getElementById('requestsList');
-            
+
             list.innerHTML = requests.map(req => `
                 <tr>
-                    <td>${req.type}</td>
+                    <td>${req.title}</td>
                     <td>${req.description}</td>
                     <td><span class="status ${req.status.toLowerCase()}">${req.status}</span></td>
                 </tr>
             `).join('');
         }
+
         window.onload = loadRequests;
     </script>
 </body>

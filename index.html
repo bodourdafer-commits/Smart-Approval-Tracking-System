@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,7 @@
 <body>
     <div class="container">
         <h2>Submit New Request</h2>
+Front-end-Developer
         <label>Request Type:</label>
         <select id="requestType">
             <option value="Vacation">Vacation</option>
@@ -27,11 +28,51 @@
                 type: document.getElementById('requestType').value,
                 description: document.getElementById('description').value,
                 status: 'Pending'
+
+        <form id="requestForm">
+            <div class="form-group">
+                <label>Request Type:</label>
+                <select id="requestType" required>
+                    <option value="Vacation">Vacation</option>
+                    <option value="Hardware">Hardware Purchase</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="description" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Send Request</button>
+        </form>
+
+        <button onclick="location.href='requests.html'" class="secondary-btn">
+            View My Requests
+        </button>
+
+        <p id="message"></p>
+    </div>
+
+    <script>
+        document.getElementById('requestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                user_id: 1,
+                request_type: document.getElementById('requestType').value,
+                description: document.getElementById('description').value,
+              main
             };
 
             const response = await fetch('http://localhost:3000/requests', {
                 method: 'POST',
+Front-end-Developer
                 headers: {'Content-Type': 'application/json'},
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+ main
                 body: JSON.stringify(data)
             });
 
