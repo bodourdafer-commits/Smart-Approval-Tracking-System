@@ -2,51 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Submit New Request</title>
+    <title>Submit Request - Smart Approval</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h2>Submit New Request</h2>
-        <form id="requestForm">
-            <div class="form-group">
-                <label>Request Type:</label>
-                <select id="requestType" required>
-                    <option value="Vacation">Vacation</option>
-                    <option value="Hardware">Hardware Purchase</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Description:</label>
-                <textarea id="description" required></textarea>
-            </div>
-            <button type="submit" class="submit-btn">Send Request</button>
-        </form>
-        <button onclick="location.href='requests.html'" class="secondary-btn">View My Requests</button>
-        <p id="message"></p>
+        <label>Request Type:</label>
+        <select id="requestType">
+            <option value="Vacation">Vacation</option>
+            <option value="Promotion">Promotion</option>
+        </select>
+
+        <label>Description:</label>
+        <textarea id="description" rows="4" placeholder="Enter request details..."></textarea>
+
+        <button onclick="sendRequest()">Send Request</button>
+        <button class="secondary-btn" onclick="location.href='requests.html'">View My Requests</button>
     </div>
 
     <script>
-        document.getElementById('requestForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function sendRequest() {
             const data = {
                 type: document.getElementById('requestType').value,
                 description: document.getElementById('description').value,
-                status: 'Pending' 
+                status: 'Pending'
             };
 
-            
             const response = await fetch('http://localhost:3000/requests', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
             });
 
-            if (response.ok) {
-                document.getElementById('message').innerText = "Request Sent Successfully!";
-                document.getElementById('requestForm').reset();
+            if(response.ok) {
+                alert('Request Sent Successfully!');
+                location.href = 'requests.html';
             }
-        });
+        }
     </script>
 </body>
 </html>
