@@ -1,16 +1,15 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
-const bodyParser = require("body-parser");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
 app.use(express.json());
 
 const db = new sqlite3.Database("./database.db");
 
 db.serialize(() => {
+
   // Users Table
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
@@ -25,7 +24,7 @@ db.serialize(() => {
   `);
 
   db.run(`
-    INSERT INTO users (username, password, name, role, department, manager_id)
+    INSERT OR IGNORE INTO users (username, password, name, role, department, manager_id)
     VALUES
     ('khaled', '1234', 'Khaled', 'General Manager', 'Management', NULL),
     ('ahmed', '1234', 'Ahmed', 'HR Manager', 'HR', 1),
@@ -40,9 +39,18 @@ db.serialize(() => {
       title TEXT,
       description TEXT,
       status TEXT DEFAULT 'Pending',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP
     )
   `);
+
+  db.run(`
+    ALTER TABLE requests ADD COLUMN updated_at TIMESTAMP
+  `, (err) => {
+    if (err && !err.message.includes("duplicate column name")) {
+      console.log(err.message);
+    }
+  });
 
   // Tracking Logs Table
   db.run(`
@@ -53,6 +61,29 @@ db.serialize(() => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+});
+
+// Seed Data
+db.get(`SELECT COUNT(*) AS count FROM requests`, (err, row) => {
+  if (err) {
+    console.log(err.message);
+  } else if (row.count === 0) {
+    db.run(`
+      INSERT INTO requests (user_id, title, description, status, created_at, updated_at)
+      VALUES
+      (3, 'Vacation', 'Need 3 days leave', 'Pending', CURRENT_TIMESTAMP, NULL),
+      (3, 'Sick Leave', 'Need 2 days sick leave', 'Approved', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `);
+
+    db.run(`
+      INSERT INTO tracking_logs (request_id, action)
+      VALUES
+      (1, 'Submitted'),
+      (2, 'Submitted'),
+      (2, 'Approved')
+    `);
+  }
 });
 
 // Root Test
@@ -60,85 +91,15 @@ app.get("/", (req, res) => {
   res.send("DB & Logic running 🚀");
 });
 
-// POST: ارسال طلب جديد
-app.post("/requests", (req, res) => {
-  const { user_id, request_type, description } = req.body;
-
-  const sql = `
-    INSERT INTO requests (user_id, title, description, status)
-    VALUES (?, ?, ?, 'Submitted')
-  `;
-
-  db.run(sql, [user_id, request_type, description], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    const requestId = this.lastID;
-
-    db.run(
-      `INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`,
-      [requestId, "Submitted"]
-    );
-
-    res.json({
-      message: "Request submitted successfully",
-      request_id: requestId
-    });
-  });
-});
-
-// GET: عرض طلبات الموظف
-app.get("/my-requests/:user_id", (req, res) => {
-  const user_id = req.params.user_id;
-
-  const sql = `
-    SELECT * FROM requests
-    WHERE user_id = ?
-  `;
-
-  db.all(sql, [user_id], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    res.json(rows);
-  });
-});
-
-// POST: موافقة المدير او رفض الطلب
-app.post("/approve-request", (req, res) => {
-  const { request_id, status } = req.body;
-
-  const sql = `
-    UPDATE requests
-    SET status = ?
-    WHERE id = ?
-  `;
-
-  db.run(sql, [status, request_id], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    db.run(
-      `INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`,
-      [request_id, status]
-    );
-
-    res.json({
-      message: "Request status updated successfully"
-    });
-  });
-});
-
-// Test Add Request
+// Test Request
 app.get("/test-request", (req, res) => {
+
   db.run(
     `INSERT INTO requests (user_id, title, description)
      VALUES (?, ?, ?)`,
     [3, "Vacation", "Need 3 days leave"],
     function (err) {
+
       if (err) return res.send(err);
 
       const requestId = this.lastID;
@@ -150,8 +111,10 @@ app.get("/test-request", (req, res) => {
       );
 
       res.send("Test request created");
+
     }
   );
+
 });
 
 // Add Request
@@ -163,6 +126,7 @@ app.post("/add-request", (req, res) => {
      VALUES (?, ?, ?)`,
     [user_id, title, description],
     function (err) {
+
       if (err) return res.status(500).json({ error: err.message });
 
       const requestId = this.lastID;
@@ -177,11 +141,42 @@ app.post("/add-request", (req, res) => {
         message: "Request created successfully",
         id: requestId
       });
+
     }
   );
 });
 
-// Login API
+// Update Status
+app.put("/update-status/:id", (req, res) => {
+
+  const requestId = req.params.id;
+  const { status } = req.body;
+
+  db.run(
+    `UPDATE requests
+     SET status = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE id = ?`,
+    [status, requestId],
+    function (err) {
+
+      if (err) return res.status(500).json({ error: err.message });
+
+      db.run(
+        `INSERT INTO tracking_logs (request_id, action)
+         VALUES (?, ?)`,
+        [requestId, status]
+      );
+
+      res.json({
+        message: "Status updated successfully"
+      });
+
+    }
+  );
+
+});
+
+// Login
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -203,7 +198,7 @@ app.post("/login", (req, res) => {
   );
 });
 
-// Get All Requests
+// Get Requests
 app.get("/requests", (req, res) => {
   db.all("SELECT * FROM requests", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -211,7 +206,7 @@ app.get("/requests", (req, res) => {
   });
 });
 
-// Get All Users
+// Get Users
 app.get("/users", (req, res) => {
   db.all("SELECT * FROM users", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -219,7 +214,7 @@ app.get("/users", (req, res) => {
   });
 });
 
-// Auto Escalation Logic
+// Auto Escalation
 function autoEscalateRequests() {
   db.run(`
     UPDATE requests
