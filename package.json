@@ -1,28 +1,12 @@
 {
-<<<<<<< HEAD
-  "name": "smart-approval-backend",
+  "name": "smart-approval-tracking-system",
   "version": "1.0.0",
-  "description": "Backend for Smart Approval Tracking System - Task 3",
+  "description": "Backend for Smart Approval Tracking System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {
-    "body-parser": "^1.20.2",
-    "express": "^4.18.2",
-    "sqlite3": "^5.1.6"
-  },
-  "author": "Your Name",
-  "license": "ISC"
-}
-=======
-  "name": "smart-approval-tracking-system",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bodourdafer-commits/Smart-Approval-Tracking-System.git"
@@ -30,15 +14,13 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/bodourdafer-commits/Smart-Approval-Tracking-System/issues"
   },
   "homepage": "https://github.com/bodourdafer-commits/Smart-Approval-Tracking-System#readme",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1",
+    "express": "^4.18.2",
     "sqlite3": "^5.1.7"
   }
 }
->>>>>>> 9c72d81551e71a9147fee112540e0021e91ce6f8
