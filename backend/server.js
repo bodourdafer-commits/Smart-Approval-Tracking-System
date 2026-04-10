@@ -11,7 +11,25 @@ let requests = [
     employee_name: "Khaled",
     request_type: "Leave",
     details: "3 days",
+    status: "Approved",
+    created_at: new Date(),
+    escalated: false
+  },
+  {
+    id: 2,
+    employee_name: "Ahmed",
+    request_type: "Loan",
+    details: "5000 SAR",
     status: "Pending",
+    created_at: new Date(Date.now() - 40000),
+    escalated: true
+  },
+  {
+    id: 3,
+    employee_name: "Sara",
+    request_type: "Vacation",
+    details: "1 week",
+    status: "Rejected",
     created_at: new Date(),
     escalated: false
   }
