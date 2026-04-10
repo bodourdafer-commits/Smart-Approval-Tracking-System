@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submit New Request</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #eef2f3, #d9e4f5);
+            display: flex;
+            justify-content: center;
+            margin-top: 60px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            width: 420px;
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        textarea {
+            height: 90px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .submit-btn {
+            background-color: #2c7be5;
+            color: white;
+        }
+
+        .secondary-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Submit New Request</h2>
+
+    <form id="requestForm">
+        <div class="form-group">
+            <label>Request Type:</label>
+            <select id="requestType" required>
+                <option value="Vacation">Vacation</option>
+                <option value="Promotion">Promotion</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea id="description" required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Send Request</button>
+    </form>
+
+    <button onclick="location.href='requests.html'" class="secondary-btn">View My Requests</button>
+
+    <p id="message"></p>
+</div>
+
+<script>
+document.getElementById('requestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+        user_id: 1,
+        request_type: document.getElementById('requestType').value,
+        description: document.getElementById('description').value
+    };
+
+    try {
+        const response = await fetch('http://localhost:3000/requests', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const message = document.getElementById('message');
+
+        if (response.ok) {
+            message.innerText = "Request Sent Successfully!";
+            document.getElementById('requestForm').reset();
+        } else {
+            message.innerText = "Request failed";
+        }
+
+    } catch {
+        document.getElementById('message').innerText = "Server connection failed";
+    }
+});
+</script>
+
+</body>
+</html>
