@@ -1,53 +1,140 @@
  
-:root {
-    --primary-blue: #003366;
-    --secondary-blue: #0056b3;
-    --success-green: #28a745;
-    --danger-red: #dc3545;
-    --light-bg: #f8f9fa;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Tajawal', sans-serif;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background-color: var(--light-bg);
-    margin: 0;
-    padding: 20px;
-    direction: ltr; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f4f8; 
+    background-image: 
+        linear-gradient(rgba(200, 215, 230, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200, 215, 230, 0.2) 1px, transparent 1px),
+        linear-gradient(rgba(200, 215, 230, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200, 215, 230, 0.1) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
 }
 
-.container {
-    max-width: 1000px;
-    margin: auto;
+.login-card {
     background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 60px 50px;
+    width: 480px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    color: #003366;
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo-text { 
+    font-size: 20px; 
+    font-weight: 500; 
+    color: #555; 
+    margin-top: 5px; 
+    letter-spacing: 1px;
 }
 
 h2 {
-    color: var(--primary-blue);
-    border-bottom: 2px solid var(--primary-blue);
-    padding-bottom: 10px;
+    font-size: 26px;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: 700;
 }
 
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th { background-color: var(--primary-blue); color: white; padding: 12px; }
-td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
+p.subtitle {
+    font-size: 16px;
+    color: #777;
+    margin-bottom: 40px;
+}
 
-.badge { padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
-.pending { background: #ffeeba; color: #856404; }
-.approved { background: #d4edda; color: #155724; }
-.rejected { background: #f8d7da; color: #721c24; }
+.input-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
 
-.btn-action {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.input-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #555;
+    font-weight: 500;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 15px;
+    padding-left: 20px;
+    border: 1px solid #e0e6ed;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #333;
+    background: #fbfcfe;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: #003366;
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 51, 102, 0.1);
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -10px;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.actions a {
+    color: #777;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.actions a:hover {
+    color: #003366;
+    text-decoration: underline;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 18px;
+    background-color: #003366;
     color: white;
-    font-weight: bold;
-    transition: 0.3s;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
-.btn-approve { background-color: var(--success-green); margin-right: 5px; }
-.btn-reject { background-color: var(--danger-red); }
-.btn-action:hover { opacity: 0.8; transform: scale(1.05); }
+
+.login-btn:hover {
+    background-color: #002244;
+}
+
+.footer {
+    text-align: center;
+    font-size: 13px;
+    color: #777;
+    line-height: 1.8;
+    margin-top: 20px;
+}

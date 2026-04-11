@@ -1,85 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
+ <!DOCTYPE html>
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>Submit New Request - Sprint 3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit New Request - Smart Approval Tracking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(to right, #f4f7f9, #dee2e6);
-            display: flex;
-            justify-content: center;
-            margin-top: 60px;
-        }
         .container {
-            background: white;
-            padding: 30px;
-            width: 420px;
-            border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #003366;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 18px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-            color: #444;
+            max-width: 480px;
+            margin-top: 50px;
         }
         select, textarea {
             width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
+            border: 1px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #fbfcfe;
+            margin-top: 8px;
         }
         textarea {
-            height: 100px;
+            height: 120px;
             resize: none;
         }
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: bold;
-            transition: 0.3s;
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
         }
-        .submit-btn {
-            background-color: #0056b3;
-            color: white;
-        }
-        .submit-btn:hover {
-            background-color: #003366;
+        label {
+            font-weight: 500;
+            color: #555;
         }
         .secondary-btn {
             background-color: #6c757d;
-            color: white;
-        }
-        .secondary-btn:hover {
-            background-color: #495057;
+            margin-top: 15px;
         }
         #message {
             margin-top: 15px;
-            text-align: center;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-<div class="container">
+
+<div class="login-card container">
     <h2>Submit New Request</h2>
+    <p class="subtitle">Please fill in the details below</p>
+    
     <form id="requestForm">
         <div class="form-group">
             <label>Request Type:</label>
@@ -89,15 +57,24 @@
                 <option value="Training">Training</option>
             </select>
         </div>
+        
         <div class="form-group">
             <label>Description:</label>
             <textarea id="description" required placeholder="Describe your request..."></textarea>
         </div>
-        <button type="submit" class="submit-btn">Send Request</button>
+        
+        <button type="submit" class="login-btn">Send Request</button>
     </form>
-    <button onclick="location.href='requests.html'" class="secondary-btn">View Dashboard & Actions</button>
+    
+    <button onclick="location.href='requests.html'" class="login-btn secondary-btn">View Dashboard & Actions</button>
+    
     <p id="message"></p>
 </div>
+
+<div class="footer">
+    © 2026 Smart Approval Tracking Project. All Rights Reserved.
+</div>
+
 <script>
 document.getElementById('requestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -127,9 +104,10 @@ document.getElementById('requestForm').addEventListener('submit', async (e) => {
     } catch {
         const message = document.getElementById('message');
         message.innerText = "Demo Mode: Request Recorded Locally";
-        message.style.color = "#0056b3";
+        message.style.color = "#003366";
     }
 });
 </script>
+
 </body>
 </html>
