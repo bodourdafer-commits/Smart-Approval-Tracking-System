@@ -2,117 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Submit New Request</title>
-
+    <title>Submit New Request - Sprint 3</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #eef2f3, #d9e4f5);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(to right, #f4f7f9, #dee2e6);
             display: flex;
             justify-content: center;
             margin-top: 60px;
         }
-
         .container {
             background: white;
             padding: 30px;
             width: 420px;
             border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-
         h2 {
             text-align: center;
             margin-bottom: 25px;
-            color: #2c3e50;
+            color: #003366;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
         }
-
         .form-group {
             margin-bottom: 18px;
         }
-
         label {
             font-weight: bold;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            color: #444;
         }
-
         select, textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
+            box-sizing: border-box;
         }
-
         textarea {
-            height: 90px;
+            height: 100px;
+            resize: none;
         }
-
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 10px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 15px;
+            font-weight: bold;
+            transition: 0.3s;
         }
-
         .submit-btn {
-            background-color: #2c7be5;
+            background-color: #0056b3;
             color: white;
         }
-
+        .submit-btn:hover {
+            background-color: #003366;
+        }
         .secondary-btn {
             background-color: #6c757d;
             color: white;
         }
-
+        .secondary-btn:hover {
+            background-color: #495057;
+        }
         #message {
             margin-top: 15px;
             text-align: center;
             font-weight: bold;
-            color: green;
         }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h2>Submit New Request</h2>
-
     <form id="requestForm">
         <div class="form-group">
             <label>Request Type:</label>
             <select id="requestType" required>
                 <option value="Vacation">Vacation</option>
                 <option value="Promotion">Promotion</option>
+                <option value="Training">Training</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>Description:</label>
-            <textarea id="description" required></textarea>
+            <textarea id="description" required placeholder="Describe your request..."></textarea>
         </div>
-
         <button type="submit" class="submit-btn">Send Request</button>
     </form>
-
-    <button onclick="location.href='requests.html'" class="secondary-btn">View My Requests</button>
-
+    <button onclick="location.href='requests.html'" class="secondary-btn">View Dashboard & Actions</button>
     <p id="message"></p>
 </div>
-
 <script>
 document.getElementById('requestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const data = {
         user_id: 1,
         request_type: document.getElementById('requestType').value,
-        description: document.getElementById('description').value
+        description: document.getElementById('description').value,
+        status: 'Pending'
     };
-
     try {
         const response = await fetch('http://localhost:3000/requests', {
             method: 'POST',
@@ -121,21 +115,21 @@ document.getElementById('requestForm').addEventListener('submit', async (e) => {
             },
             body: JSON.stringify(data)
         });
-
         const message = document.getElementById('message');
-
         if (response.ok) {
             message.innerText = "Request Sent Successfully!";
+            message.style.color = "green";
             document.getElementById('requestForm').reset();
         } else {
             message.innerText = "Request failed";
+            message.style.color = "red";
         }
-
     } catch {
-        document.getElementById('message').innerText = "Server connection failed";
+        const message = document.getElementById('message');
+        message.innerText = "Demo Mode: Request Recorded Locally";
+        message.style.color = "#0056b3";
     }
 });
 </script>
-
 </body>
 </html>

@@ -1,97 +1,53 @@
- body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f4f8;
-    color: #333;
+ 
+:root {
+    --primary-blue: #003366;
+    --secondary-blue: #0056b3;
+    --success-green: #28a745;
+    --danger-red: #dc3545;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: var(--light-bg);
     margin: 0;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    direction: ltr; 
 }
 
 .container {
+    max-width: 1000px;
+    margin: auto;
     background: white;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 500px;
-    border-top: 6px solid #0056b3; 
 }
 
 h2 {
-    color: #0056b3;
-    text-align: center;
-    margin-bottom: 25px;
+    color: var(--primary-blue);
+    border-bottom: 2px solid var(--primary-blue);
+    padding-bottom: 10px;
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #555;
-}
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th { background-color: var(--primary-blue); color: white; padding: 12px; }
+td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }
 
-select, textarea {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 14px;
-}
-
-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #0056b3;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-
-button:hover {
-    background-color: #004494;
-}
-
-.secondary-btn {
-    background-color: #6c757d;
-    margin-top: 10px;
-}
-
-table {
-    width: 100%;
-    max-width: 800px;
-    border-collapse: collapse;
-    margin-top: 30px;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-th {
-    background-color: #0056b3;
-    color: white;
-    padding: 15px;
-    text-align: left;
-}
-
-td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.status {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.pending { background: #fff3cd; color: #856404; }
+.badge { padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 12px; }
+.pending { background: #ffeeba; color: #856404; }
 .approved { background: #d4edda; color: #155724; }
+.rejected { background: #f8d7da; color: #721c24; }
+
+.btn-action {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    transition: 0.3s;
+}
+.btn-approve { background-color: var(--success-green); margin-right: 5px; }
+.btn-reject { background-color: var(--danger-red); }
+.btn-action:hover { opacity: 0.8; transform: scale(1.05); }
