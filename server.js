@@ -1,4 +1,4 @@
- const express = require("express");
+  const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -57,9 +57,11 @@ db.serialize(() => {
   `);
 });
 
-// Root Test
 app.get("/", (req, res) => {
-  res.send("DB & Logic running 🚀 - Sprint 4 Ready");
+  res.status(200).json({
+    status: "success",
+    message: "Server is running and Database connection is established",
+  });
 });
 
 
@@ -160,7 +162,7 @@ function autoEscalateRequests() {
 
 setInterval(autoEscalateRequests, 60000);
 
-// Start Server
+
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
 });
