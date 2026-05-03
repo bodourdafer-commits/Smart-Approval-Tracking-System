@@ -1,4 +1,4 @@
-const express = require("express");
+  const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -11,7 +11,7 @@ app.use(express.json());
 const db = new sqlite3.Database("./database.db");
 
 db.serialize(() => {
-  // Users Table
+  
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,15 +24,16 @@ db.serialize(() => {
     )
   `);
 
+  
   db.run(`
-    INSERT INTO users (username, password, name, role, department, manager_id)
+    INSERT OR IGNORE INTO users (username, password, name, role, department, manager_id)
     VALUES
     ('khaled', '1234', 'Khaled', 'General Manager', 'Management', NULL),
     ('ahmed', '1234', 'Ahmed', 'HR Manager', 'HR', 1),
     ('sara', '1234', 'Sara', 'Employee', 'HR', 2)
   `);
 
-  // Requests Table
+  
   db.run(`
     CREATE TABLE IF NOT EXISTS requests (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,11 +41,12 @@ db.serialize(() => {
       title TEXT,
       description TEXT,
       status TEXT DEFAULT 'Pending',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
-  // Tracking Logs Table
+  
   db.run(`
     CREATE TABLE IF NOT EXISTS tracking_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,155 +57,88 @@ db.serialize(() => {
   `);
 });
 
-// Root Test
 app.get("/", (req, res) => {
-  res.send("DB & Logic running 🚀");
+  res.status(200).json({
+    status: "success",
+    message: "Server is running and Database connection is established",
+  });
 });
 
-// POST: ارسال طلب جديد
+
 app.post("/requests", (req, res) => {
   const { user_id, request_type, description } = req.body;
-
-  const sql = `
-    INSERT INTO requests (user_id, title, description, status)
-    VALUES (?, ?, ?, 'Submitted')
-  `;
+  const sql = `INSERT INTO requests (user_id, title, description, status) VALUES (?, ?, ?, 'Submitted')`;
 
   db.run(sql, [user_id, request_type, description], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
+    if (err) return res.status(500).json({ error: err.message });
     const requestId = this.lastID;
+    db.run(`INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`, [requestId, "Submitted"]);
+    res.json({ message: "Request submitted successfully", request_id: requestId });
+  });
+});
 
-    db.run(
-      `INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`,
-      [requestId, "Submitted"]
-    );
 
-    res.json({
-      message: "Request submitted successfully",
-      request_id: requestId
+app.post("/approve-request", (req, res) => {
+  const { request_id, status } = req.body;
+  const sql = `UPDATE requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+
+  db.run(sql, [status, request_id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    db.run(`INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`, [request_id, status]);
+    res.json({ message: "Request status updated successfully" });
+  });
+});
+
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+  db.get("SELECT role FROM users WHERE username = ? AND password = ?", [username, password], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(401).json({ error: "Invalid credentials" });
+    res.json({ message: "Login successful", role: row.role });
+  });
+});
+
+
+
+app.get("/api/dashboard/analytics", (req, res) => {
+  const analytics = {};
+
+  
+  const statusSql = `
+    SELECT 
+      SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
+      SUM(CASE WHEN status = 'Rejected' THEN 1 ELSE 0 END) as rejected,
+      SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pending,
+      SUM(CASE WHEN status = 'Escalated' THEN 1 ELSE 0 END) as escalated
+    FROM requests`;
+
+  db.get(statusSql, [], (err, stats) => {
+    if (err) return res.status(500).json({ error: err.message });
+    analytics.counts = stats;
+
+    
+    const timeSql = `
+      SELECT AVG(strftime('%s', updated_at) - strftime('%s', created_at)) / 60 as avg_minutes 
+      FROM requests 
+      WHERE status IN ('Approved', 'Rejected') AND updated_at IS NOT NULL`;
+
+    db.get(timeSql, [], (err, timeRow) => {
+      analytics.avg_approval_time = timeRow.avg_minutes ? Math.round(timeRow.avg_minutes) + " min" : "0 min";
+      res.json(analytics);
     });
   });
 });
 
-// GET: عرض طلبات الموظف
+
 app.get("/my-requests/:user_id", (req, res) => {
-  const user_id = req.params.user_id;
-
-  const sql = `
-    SELECT * FROM requests
-    WHERE user_id = ?
-  `;
-
-  db.all(sql, [user_id], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
+  db.all(`SELECT * FROM requests WHERE user_id = ?`, [req.params.user_id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 });
 
-// POST: موافقة المدير او رفض الطلب
-app.post("/approve-request", (req, res) => {
-  const { request_id, status } = req.body;
 
-  const sql = `
-    UPDATE requests
-    SET status = ?
-    WHERE id = ?
-  `;
-
-  db.run(sql, [status, request_id], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    db.run(
-      `INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`,
-      [request_id, status]
-    );
-
-    res.json({
-      message: "Request status updated successfully"
-    });
-  });
-});
-
-// Test Add Request
-app.get("/test-request", (req, res) => {
-  db.run(
-    `INSERT INTO requests (user_id, title, description)
-     VALUES (?, ?, ?)`,
-    [3, "Vacation", "Need 3 days leave"],
-    function (err) {
-      if (err) return res.send(err);
-
-      const requestId = this.lastID;
-
-      db.run(
-        `INSERT INTO tracking_logs (request_id, action)
-         VALUES (?, ?)`,
-        [requestId, "Submitted"]
-      );
-
-      res.send("Test request created");
-    }
-  );
-});
-
-// Add Request
-app.post("/add-request", (req, res) => {
-  const { user_id, title, description } = req.body;
-
-  db.run(
-    `INSERT INTO requests (user_id, title, description)
-     VALUES (?, ?, ?)`,
-    [user_id, title, description],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-
-      const requestId = this.lastID;
-
-      db.run(
-        `INSERT INTO tracking_logs (request_id, action)
-         VALUES (?, ?)`,
-        [requestId, "Submitted"]
-      );
-
-      res.json({
-        message: "Request created successfully",
-        id: requestId
-      });
-    }
-  );
-});
-
-// Login API
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-
-  db.get(
-    "SELECT role FROM users WHERE username = ? AND password = ?",
-    [username, password],
-    (err, row) => {
-      if (err) return res.status(500).json({ error: err.message });
-
-      if (!row) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      res.json({
-        message: "Login successful",
-        role: row.role
-      });
-    }
-  );
-});
-
-// Get All Requests
 app.get("/requests", (req, res) => {
   db.all("SELECT * FROM requests", [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -211,27 +146,23 @@ app.get("/requests", (req, res) => {
   });
 });
 
-// Get All Users
-app.get("/users", (req, res) => {
-  db.all("SELECT * FROM users", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
 
-// Auto Escalation Logic
 function autoEscalateRequests() {
-  db.run(`
-    UPDATE requests
-    SET status = 'Escalated'
-    WHERE status = 'Pending'
-    AND datetime(created_at) <= datetime('now', '-24 hours')
-  `);
+  const checkSql = "SELECT id FROM requests WHERE status = 'Pending' AND datetime(created_at) <= datetime('now', '-24 hours')";
+  
+  db.all(checkSql, [], (err, rows) => {
+    if (err) return;
+    rows.forEach((row) => {
+      db.run("UPDATE requests SET status = 'Escalated', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [row.id], () => {
+        db.run("INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)", [row.id, "Auto-Escalated"]);
+      });
+    });
+  });
 }
 
 setInterval(autoEscalateRequests, 60000);
 
-// Start Server
+
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
 });
