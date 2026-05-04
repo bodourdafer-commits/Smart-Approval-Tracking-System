@@ -1,7 +1,25 @@
 {
+<<<<<<< HEAD
+  "name": "smart-approval-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "sqlite3": "^6.0.1"
+  }
+=======
   "name": "smart-approval-backend",
   "version": "1.0.0",
-  "description": "Backend for Smart Approval Tracking System - Task 3",
+  "description": "Backend for Smart Approval Tracking System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -13,4 +31,5 @@
   },
   "author": "Your Name",
   "license": "ISC"
+>>>>>>> 17a920ee321463c01d8966ed9f8e1ed00d1ecafe
 }
