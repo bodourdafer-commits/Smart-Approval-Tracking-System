@@ -1,64 +1,72 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Requests</title>
-
+    <title>Manager Dashboard - Sprint 3</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #eef2f3, #d9e4f5);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(to right, #f4f7f9, #dee2e6);
             display: flex;
             justify-content: center;
-            margin-top: 60px;
+            margin-top: 40px;
         }
-
         .container {
             background: white;
             padding: 30px;
-            width: 600px;
+            width: 850px;
             border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        h2 { text-align: center; color: #003366; }
 
-        h2 {
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            margin-bottom: 25px;
-            color: #2c3e50;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #2c7be5;
+            width: 30%;
             color: white;
+            font-weight: bold;
         }
+        .pending-card { background-color: #ffc107; }
+        .approved-card { background-color: #28a745; }
+        .rejected-card { background-color: #dc3545; }
 
-        button {
-            width: 100%;
-            margin-top: 20px;
-            padding: 10px;
-            border: none;
-            background-color: #6c757d;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: center; }
+        th { background-color: #003366; color: white; }
+        
+        .btn-action {
+            padding: 8px 15px; border: none; border-radius: 5px;
+            cursor: pointer; color: white; font-weight: bold; margin: 2px;
+        }
+        .btn-approve { background-color: #28a745; }
+        .btn-reject { background-color: #dc3545; }
+        
+        button.back-btn {
+            width: 100%; margin-top: 20px; padding: 12px;
+            border: none; background-color: #6c757d; color: white;
+            border-radius: 8px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>My Submitted Requests</h2>
+    <h2>Manager Approval Dashboard</h2>
+
+    <div class="stats-container">
+        <div class="stat-card pending-card">Pending<br><span id="countPending">0</span></div>
+        <div class="stat-card approved-card">Approved<br><span id="countApproved">0</span></div>
+        <div class="stat-card rejected-card">Rejected<br><span id="countRejected">0</span></div>
+    </div>
 
     <table>
         <thead>
@@ -66,31 +74,66 @@
                 <th>Type</th>
                 <th>Description</th>
                 <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="requestsList"></tbody>
     </table>
-
-    <button onclick="location.href='index.html'">Back</button>
+    <button class="back-btn" onclick="location.href='index.html'">Back to Home</button>
 </div>
 
 <script>
 async function loadRequests() {
-    const response = await fetch('http://localhost:3000/my-requests/1');
-    const requests = await response.json();
-    const list = document.getElementById('requestsList');
+    try {
+        const response = await fetch('http://localhost:3000/my-requests/1');
+        const requests = await response.json();
+        const list = document.getElementById('requestsList');
 
-    list.innerHTML = requests.map(req => `
-        <tr>
-            <td>${req.title}</td>
-            <td>${req.description}</td>
-            <td>${req.status}</td>
-        </tr>
-    `).join('');
+        document.getElementById('countPending').innerText = requests.filter(r => r.status === 'Pending').length;
+        document.getElementById('countApproved').innerText = requests.filter(r => r.status === 'Approved').length;
+        document.getElementById('countRejected').innerText = requests.filter(r => r.status === 'Rejected').length;
+
+        list.innerHTML = requests.map(req => `
+            <tr>
+                <td><strong>${req.title || req.request_type}</strong></td>
+                <td>${req.description}</td>
+                <td><span style="color:${req.status === 'Approved' ? 'green' : (req.status === 'Rejected' ? 'red' : 'orange')}">${req.status}</span></td>
+                <td>
+                    <button class="btn-action btn-approve" onclick="updateStatus(${req.id}, 'Approved')">Approve</button>
+                    <button class="btn-action btn-reject" onclick="updateStatus(${req.id}, 'Rejected')">Reject</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch { console.log("Offline mode"); }
+}
+
+async function updateStatus(id, newStatus) {
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you want to ${newStatus} this request?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: newStatus === 'Approved' ? '#28a745' : '#dc3545',
+        confirmButtonText: `Yes, ${newStatus} it!`
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                await fetch(`http://localhost:3000/requests/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                Swal.fire('Updated!', `Request has been ${newStatus}.`, 'success');
+                loadRequests();
+            } catch {
+                Swal.fire('Demo Mode', `Simulating ${newStatus} status.`, 'info');
+            }
+        }
+    });
 }
 
 window.onload = loadRequests;
 </script>
-
 </body>
 </html>
