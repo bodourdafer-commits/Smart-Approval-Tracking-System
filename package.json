@@ -1,7 +1,7 @@
 {
   "name": "smart-approval-backend",
   "version": "1.0.0",
-  "description": "Backend for Smart Approval Tracking System - Task 3",
+  "description": "Backend for Smart Approval Tracking System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
