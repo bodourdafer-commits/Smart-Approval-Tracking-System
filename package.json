@@ -7,17 +7,6 @@
     "start": "node server.js"
   },
   "type": "commonjs",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bodourdafer-commits/Smart-Approval-Tracking-System.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/bodourdafer-commits/Smart-Approval-Tracking-System/issues"
-  },
-  "homepage": "https://github.com/bodourdafer-commits/Smart-Approval-Tracking-System#readme",
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^4.18.2",
