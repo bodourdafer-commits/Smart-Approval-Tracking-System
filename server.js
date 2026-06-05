@@ -1,6 +1,13 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+const sqlite3 = require("sqlite3").verbose();
+>>>>>>> 1cc025ff71a59cc3dabcc2f7e09fd9cfe918cf91
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
 
 const app = express();
 const PORT = 3000;
@@ -11,6 +18,15 @@ app.use(express.json());
 const db = new sqlite3.Database("./database.db");
 
 db.serialize(() => {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+  // Users Table
+=======
+  
+>>>>>>> 1cc025ff71a59cc3dabcc2f7e09fd9cfe918cf91
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,11 +55,34 @@ db.serialize(() => {
       description TEXT,
       status TEXT DEFAULT 'Pending',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
       updated_at TIMESTAMP
     )
   `);
 
   db.run(`
+<<<<<<< HEAD
+=======
+    ALTER TABLE requests ADD COLUMN updated_at TIMESTAMP
+  `, (err) => {
+    if (err && !err.message.includes("duplicate column name")) {
+      console.log(err.message);
+    }
+  });
+
+  // Tracking Logs Table
+=======
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  
+>>>>>>> 1cc025ff71a59cc3dabcc2f7e09fd9cfe918cf91
+  db.run(`
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
     CREATE TABLE IF NOT EXISTS tracking_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       request_id INTEGER,
@@ -60,8 +99,14 @@ app.get("/", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
+=======
+<<<<<<< HEAD
+// Test Request
+app.get("/test-request", (req, res) => {
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
 
   db.get(
     "SELECT * FROM users WHERE username = ? AND password = ?",
@@ -150,6 +195,48 @@ app.put("/update-status/:id", (req, res) => {
   );
 });
 
+<<<<<<< HEAD
+=======
+// Get Requests
+=======
+
+app.post("/requests", (req, res) => {
+  const { user_id, request_type, description } = req.body;
+  const sql = `INSERT INTO requests (user_id, title, description, status) VALUES (?, ?, ?, 'Submitted')`;
+
+  db.run(sql, [user_id, request_type, description], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    const requestId = this.lastID;
+    db.run(`INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`, [requestId, "Submitted"]);
+    res.json({ message: "Request submitted successfully", request_id: requestId });
+  });
+});
+
+
+app.post("/approve-request", (req, res) => {
+  const { request_id, status } = req.body;
+  const sql = `UPDATE requests SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+
+  db.run(sql, [status, request_id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    db.run(`INSERT INTO tracking_logs (request_id, action) VALUES (?, ?)`, [request_id, status]);
+    res.json({ message: "Request status updated successfully" });
+  });
+});
+
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+  db.get("SELECT role FROM users WHERE username = ? AND password = ?", [username, password], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(401).json({ error: "Invalid credentials" });
+    res.json({ message: "Login successful", role: row.role });
+  });
+});
+
+
+
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
 app.get("/api/dashboard/analytics", (req, res) => {
   const sql = `
     SELECT 
@@ -166,6 +253,28 @@ app.get("/api/dashboard/analytics", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1cc025ff71a59cc3dabcc2f7e09fd9cfe918cf91
+app.get("/requests", (req, res) => {
+  db.all("SELECT * FROM requests", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+<<<<<<< HEAD
+// Get Users
+app.get("/users", (req, res) => {
+  db.all("SELECT * FROM users", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Auto Escalation
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
 function autoEscalateRequests() {
   db.run(`
     UPDATE requests
@@ -174,9 +283,25 @@ function autoEscalateRequests() {
     AND datetime(created_at) <= datetime('now', '-24 hours')
   `);
 }
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
 
 setInterval(autoEscalateRequests, 60 * 60 * 1000);
 
 app.listen(PORT, () => {
+<<<<<<< HEAD
   console.log(`Server running on http://localhost:${PORT}`);
 });
+=======
+  console.log(`http://localhost:${PORT}`);
+});
+>>>>>>> 1cc025ff71a59cc3dabcc2f7e09fd9cfe918cf91
+
+
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
+17a920ee321463c01d8966ed9f8e1ed00d1ecafe
+>>>>>>> 8bd1b7ae3024bb510b5a9d7e9c806e154ec0a871
