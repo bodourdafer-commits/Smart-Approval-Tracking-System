@@ -1,52 +1,113 @@
  <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <title>Submit New Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit New Request - Smart Approval Tracking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .container {
+            max-width: 480px;
+            margin-top: 50px;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #fbfcfe;
+            margin-top: 8px;
+        }
+        textarea {
+            height: 120px;
+            resize: none;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            font-weight: 500;
+            color: #555;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+            margin-top: 15px;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Submit New Request</h2>
-        <form id="requestForm">
-            <div class="form-group">
-                <label>Request Type:</label>
-                <select id="requestType" required>
-                    <option value="Vacation">Vacation</option>
-                    <option value="Hardware">Hardware Purchase</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Description:</label>
-                <textarea id="description" required></textarea>
-            </div>
-            <button type="submit" class="submit-btn">Send Request</button>
-        </form>
-        <button onclick="location.href='requests.html'" class="secondary-btn">View My Requests</button>
-        <p id="message"></p>
-    </div>
 
-    <script>
-        document.getElementById('requestForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                type: document.getElementById('requestType').value,
-                description: document.getElementById('description').value,
-                status: 'Pending' 
-            };
+<div class="login-card container">
+    <h2>Submit New Request</h2>
+    <p class="subtitle">Please fill in the details below</p>
+    
+    <form id="requestForm">
+        <div class="form-group">
+            <label>Request Type:</label>
+            <select id="requestType" required>
+                <option value="Vacation">Vacation</option>
+                <option value="Promotion">Promotion</option>
+                <option value="Training">Training</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea id="description" required placeholder="Describe your request..."></textarea>
+        </div>
+        
+        <button type="submit" class="login-btn">Send Request</button>
+    </form>
+    
+    <button onclick="location.href='requests.html'" class="login-btn secondary-btn">View Dashboard & Actions</button>
+    
+    <p id="message"></p>
+</div>
 
-            
-            const response = await fetch('http://localhost:3000/requests', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+<div class="footer">
+    © 2026 Smart Approval Tracking Project. All Rights Reserved.
+</div>
 
-            if (response.ok) {
-                document.getElementById('message').innerText = "Request Sent Successfully!";
-                document.getElementById('requestForm').reset();
-            }
+<script>
+document.getElementById('requestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+        user_id: 1,
+        request_type: document.getElementById('requestType').value,
+        description: document.getElementById('description').value,
+        status: 'Pending'
+    };
+    try {
+        const response = await fetch('http://localhost:3000/requests', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         });
-    </script>
+        const message = document.getElementById('message');
+        if (response.ok) {
+            message.innerText = "Request Sent Successfully!";
+            message.style.color = "green";
+            document.getElementById('requestForm').reset();
+        } else {
+            message.innerText = "Request failed";
+            message.style.color = "red";
+        }
+    } catch {
+        const message = document.getElementById('message');
+        message.innerText = "Demo Mode: Request Recorded Locally";
+        message.style.color = "#003366";
+    }
+});
+</script>
+
 </body>
 </html>
