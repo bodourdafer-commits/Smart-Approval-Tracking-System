@@ -1,41 +1,53 @@
-async function loadDashboard() {
-  const res = await fetch("http://localhost:3000/api/dashboard");
-  const data = await res.json();
+let requests = JSON.parse(localStorage.getItem("requests")) || [];
 
-  
-  document.getElementById("pending").innerText = data.pending;
-  document.getElementById("approved").innerText = data.approved;
-  document.getElementById("rejected").innerText = data.rejected;
-  document.getElementById("escalated").innerText = data.escalated;
-  document.getElementById("avg").innerText = data.avgApprovalTime;
+function login() {
+  let user = document.getElementById("username").value;
+  if (user) {
+    localStorage.setItem("user", user);
+    window.location.href = "dashboard.html";
+  }
+}
 
- 
-  new Chart(document.getElementById("statusChart"), {
-    type: "pie",
-    data: {
-      labels: ["Pending", "Approved", "Rejected", "Escalated"],
-      datasets: [{
-        data: [
-          data.pending,
-          data.approved,
-          data.rejected,
-          data.escalated
-        ]
-      }]
-    }
-  });
+function submitRequest() {
+  let input = document.getElementById("requestInput").value;
 
-  
-  new Chart(document.getElementById("approvalChart"), {
-    type: "bar",
-    data: {
-      labels: ["Avg Approval Time"],
-      datasets: [{
-        label: "Hours",
-        data: [data.avgApprovalTime]
-      }]
-    }
+  let newRequest = {
+    text: input,
+    status: "Pending"
+  };
+
+  requests.push(newRequest);
+  localStorage.setItem("requests", JSON.stringify(requests));
+
+  alert("Request submitted!");
+  window.location.href = "dashboard.html";
+}
+
+if (document.getElementById("requestList")) {
+  let list = document.getElementById("requestList");
+
+  requests.forEach(r => {
+    let li = document.createElement("li");
+    li.innerText = r.text + " - " + r.status;
+    list.appendChild(li);
   });
 }
 
-loadDashboard();
+if (document.getElementById("approvalList")) {
+  let list = document.getElementById("approvalList");
+
+  requests.forEach((r, index) => {
+    let li = document.createElement("li");
+    li.innerHTML = `
+      ${r.text} - ${r.status}
+      <button onclick="approve(${index})">Approve</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function approve(index) {
+  requests[index].status = "Approved";
+  localStorage.setItem("requests", JSON.stringify(requests));
+  location.reload();
+}
