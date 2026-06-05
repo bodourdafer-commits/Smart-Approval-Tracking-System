@@ -8,20 +8,75 @@ const db = new sqlite3.Database('./database.db', (err) => {
   }
 });
 
+const requestTypes = [
+  'Vacation Request',
+  'Sick Leave Request',
+  'Training Request',
+  'Business Trip Request',
+  'Remote Work Request',
+  'Purchase Request',
+  'Equipment Request',
+  'Software Access Request',
+  'Maintenance Request',
+  'Overtime Request',
+  'Salary Advance Request',
+  'Work From Home Request',
+  'Conference Attendance Request',
+  'Medical Leave Request',
+  'Department Transfer Request'
+];
+
+const descriptions = [
+  'Employee requests annual leave approval.',
+  'Employee requests sick leave approval.',
+  'Request submitted for training program attendance.',
+  'Business trip approval is required.',
+  'Employee requests remote work approval.',
+  'Purchase request submitted for approval.',
+  'Equipment request submitted for operational needs.',
+  'Software access request awaiting approval.',
+  'Maintenance support request submitted.',
+  'Overtime work approval request.',
+  'Request for salary advance approval.',
+  'Work from home request submitted.',
+  'Conference participation approval required.',
+  'Medical leave request submitted.',
+  'Department transfer request under review.'
+];
+
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 db.serialize(() => {
+
+  // حذف البيانات التجريبية القديمة
+  db.run(`
+    DELETE FROM requests
+    WHERE title LIKE 'Demo Request%'
+  `);
+
   const stmt = db.prepare(`
-    INSERT INTO requests (user_id, title, description, status, created_at, updated_at)
+    INSERT INTO requests
+    (user_id, title, description, status, created_at, updated_at)
     VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
   `);
 
   for (let i = 1; i <= 220; i++) {
-    const statuses = ['Pending', 'Approved', 'Rejected', 'Escalated'];
+
+    const statuses = [
+      'Pending',
+      'Approved',
+      'Rejected',
+      'Escalated'
+    ];
+
     const status = statuses[i % 4];
 
     stmt.run(
       3,
-      `Demo Request ${i}`,
-      `Realistic sample request number ${i} for final demo dataset.`,
+      randomItem(requestTypes),
+      randomItem(descriptions),
       status,
       function (err) {
         if (err) {
@@ -32,17 +87,26 @@ db.serialize(() => {
   }
 
   stmt.finalize((err) => {
+
     if (err) {
       console.error('Finalize error:', err.message);
     } else {
-      console.log('✅ 220 requests inserted.');
+      console.log('✅ 220 realistic requests inserted successfully.');
     }
 
-    db.all("SELECT status, COUNT(*) as total FROM requests GROUP BY status", [], (err, rows) => {
-      if (err) console.error(err.message);
-      else console.log(rows);
+    db.all(
+      "SELECT status, COUNT(*) as total FROM requests GROUP BY status",
+      [],
+      (err, rows) => {
 
-      db.close();
-    });
+        if (err) {
+          console.error(err.message);
+        } else {
+          console.log(rows);
+        }
+
+        db.close();
+      }
+    );
   });
 });
